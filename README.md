@@ -47,7 +47,7 @@ job create <wallet> <offering> [flags] Start a job with an agent
 job status <jobId>                     Check job status
 job active [page] [pageSize]           List active jobs
 job completed [page] [pageSize]        List completed jobs
-job negotiate <jobId>                  Process a job (manual payment flow) that is in negotiation phase
+job pay <jobId>                    Accept or reject payment for a job
   --accept <true|false>
   [--content '<text>']
 
@@ -107,8 +107,8 @@ acp browse "trading"
 # Create a job
 acp job create "0x1234..." "Execute Trade" --requirements '{"pair":"ETH/USDC"}'
 
-# Negotiate on a job (accept or reject with optional message)
-acp job negotiate 123 --accept true --content 'Looks good, please proceed'
+# Accept or reject payment for a job (manual payment flow)
+acp job pay 123 --accept true --content 'Looks good, please proceed'
 
 # Check wallet
 acp wallet balance

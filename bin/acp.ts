@@ -112,11 +112,13 @@ function buildHelp(): string {
     "",
     cmd("job create <wallet> <offering>", "Start a job with an agent"),
     flag("--requirements '<json>'", "Service requirements (JSON)"),
-    flag("--isAutomated <true|false>", "Control payment flow (default: true)"),
+    flag("--isAutomated <true|false>", "Payment review (default: false). Set true to auto-pay"),
     cmd("job status <job-id>", "Check job status"),
+    cmd("job pay <job-id>", "Accept or reject payment for a job"),
+    flag("--accept <true|false>", "Accept or reject the payment"),
+    flag("--content '<text>'", "Optional memo or message"),
     cmd("job active [page] [pageSize]", "List active jobs"),
     cmd("job completed [page] [pageSize]", "List completed jobs"),
-    cmd("job negotiate <job-id>", "Process negotiation for a job"),
     cmd("bounty create [query]", "Create a new bounty (interactive or flags)"),
     flag("--title <text>", "Bounty title"),
     flag("--description <text>", "Bounty description"),
@@ -270,7 +272,7 @@ function buildCommandHelp(command: string): string | undefined {
         "",
         cmd("create <wallet> <offering>", "Start a job with an agent"),
         flag("--requirements '<json>'", "Service requirements (JSON)"),
-        flag("--isAutomated <true|false>", "Control payment flow (default: true — automatic)"),
+        flag("--isAutomated <true|false>", "Payment review (default: false). Set true to auto-pay"),
         `    ${dim(
           'Example: acp job create 0x1234 "Execute Trade" --requirements \'{"pair":"ETH/USDC"}\''
         )}`,
@@ -282,9 +284,9 @@ function buildCommandHelp(command: string): string | undefined {
         cmd("completed [page] [pageSize]", "List completed jobs"),
         `    ${dim("Pagination: positional args or --page N --pageSize N")}`,
         "",
-        cmd("negotiate <job-id>", "Accept or reject job negotiation"),
-        flag("--accept <true|false>", "Whether to accept the negotiation"),
-        flag("--content '<text>'", "Optional message or memo content"),
+        cmd("pay <job-id>", "Accept or reject payment for a job"),
+        flag("--accept <true|false>", "Accept or reject the payment"),
+        flag("--content '<text>'", "Optional memo or message"),
         "",
       ].join("\n"),
 
@@ -620,7 +622,7 @@ async function main(): Promise<void> {
           }
         }
 
-        let isAutomated = true;
+        let isAutomated = false;
         if (typeof isAutomatedStr === "string") {
           const lowered = isAutomatedStr.toLowerCase();
           if (["true", "1"].includes(lowered)) {
@@ -656,7 +658,7 @@ async function main(): Promise<void> {
         if (subcommand === "active") return job.active(opts);
         return job.completed(opts);
       }
-      if (subcommand === "negotiate") {
+      if (subcommand === "pay") {
         const jobId = rest[0];
         const acceptStr = getFlagValue(rest, "--accept");
         if (!acceptStr) {
@@ -674,7 +676,7 @@ async function main(): Promise<void> {
           process.exit(1);
         }
         const content = getFlagValue(rest, "--content");
-        return job.negotiate(jobId, accept, content);
+        return job.pay(jobId, accept, content);
       }
       console.log(buildCommandHelp("job"));
       return;

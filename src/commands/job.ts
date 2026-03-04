@@ -3,7 +3,7 @@
 // acp job status <jobId>
 // acp job active
 // acp job completed
-// acp job negotiate <jobId> --accept <true|false> [--content '<text>']
+// acp job pay <jobId> --accept <true|false> [--content '<text>']
 // =============================================================================
 
 import client from "../lib/client.js";
@@ -21,7 +21,7 @@ export async function create(
   agentWalletAddress: string,
   jobOfferingName: string,
   serviceRequirements: Record<string, unknown>,
-  isAutomated: boolean = true
+  isAutomated: boolean = false
 ): Promise<void> {
   if (!agentWalletAddress || !jobOfferingName) {
     output.fatal(
@@ -47,9 +47,9 @@ export async function create(
   }
 }
 
-export async function negotiate(jobId: string, accept: boolean, content?: string): Promise<void> {
+export async function pay(jobId: string, accept: boolean, content?: string): Promise<void> {
   if (!jobId) {
-    output.fatal("Usage: acp job negotiate <jobId> --accept <true|false> [--content '<text>']");
+    output.fatal("Usage: acp job pay <jobId> --accept <true|false> [--content '<text>']");
   }
 
   try {
@@ -65,7 +65,7 @@ export async function negotiate(jobId: string, accept: boolean, content?: string
         content: content ?? null,
       },
       (data) => {
-        output.heading("Negotiation Processed");
+        output.heading("Payment Processed");
         output.field("Job ID", data.jobId);
         output.field("Accepted", data.accept ? "true" : "false");
         if (data.content) {
@@ -76,7 +76,7 @@ export async function negotiate(jobId: string, accept: boolean, content?: string
     );
   } catch (e) {
     output.fatal(
-      `Failed to process negotiation phase: ${e instanceof Error ? e.message : String(e)}`
+      `Failed to process payment: ${e instanceof Error ? e.message : String(e)}`
     );
   }
 }
