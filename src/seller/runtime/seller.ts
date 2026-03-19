@@ -153,8 +153,19 @@ async function handleNewTask(data: AcpJobEventData): Promise<void> {
         reason: "Job accepted",
       });
 
+      // Run normal payment flow for all jobs
+      const funds =
+        config.requiredFunds && handlers.requestAdditionalFunds
+          ? await handlers.requestAdditionalFunds(requirements)
+          : undefined;
+
+      const paymentReason = handlers.requestPayment
+        ? await handlers.requestPayment(requirements)
+        : (funds?.content ?? "Request accepted");
+
+      // For subscription jobs, check status and append to content
+      let content = paymentReason;
       if (isSubscriptionJob(data)) {
-        // Subscription job — check if client has active subscription
         const subCheck = await checkSubscription(
           data.clientAddress,
           data.providerAddress,
@@ -165,37 +176,23 @@ async function handleNewTask(data: AcpJobEventData): Promise<void> {
           console.log(
             `[seller] Job ${jobId} requires subscription payment for tier "${subCheck.tier.name}"`
           );
-          await requestPayment(jobId, {
-            content: `Subscription required: ${subCheck.tier.name} (${subCheck.tier.price} USDC for ${subCheck.tier.duration} days)`,
-          });
+          content = `${paymentReason}\nSubscription required: ${subCheck.tier.name} (${subCheck.tier.price} USDC for ${subCheck.tier.duration} days)`;
         } else {
           console.log(`[seller] Job ${jobId} — valid subscription, proceeding`);
-          await requestPayment(jobId, {
-            content: "Subscription active",
-          });
+          content = `${paymentReason}\nSubscription active`;
         }
-      } else {
-        // Normal (non-subscription) job — payment flow
-        const funds =
-          config.requiredFunds && handlers.requestAdditionalFunds
-            ? await handlers.requestAdditionalFunds(requirements)
-            : undefined;
-
-        const paymentReason = handlers.requestPayment
-          ? await handlers.requestPayment(requirements)
-          : (funds?.content ?? "Request accepted");
-
-        await requestPayment(jobId, {
-          content: paymentReason,
-          payableDetail: funds
-            ? {
-                amount: funds.amount,
-                tokenAddress: funds.tokenAddress,
-                recipient: funds.recipient,
-              }
-            : undefined,
-        });
       }
+
+      await requestPayment(jobId, {
+        content,
+        payableDetail: funds
+          ? {
+              amount: funds.amount,
+              tokenAddress: funds.tokenAddress,
+              recipient: funds.recipient,
+            }
+          : undefined,
+      });
     } catch (err) {
       console.error(`[seller] Error processing job ${jobId}:`, err);
     }
