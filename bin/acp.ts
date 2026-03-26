@@ -78,6 +78,7 @@ function buildHelp(): string {
     `  ${dim("Usage:")}  ${bold("acp")} ${dim("<command> [subcommand] [args] [flags]")}`,
     "",
     section("Getting Started"),
+    cmd("init <partner-id>", "Save partner ID (run before setup)"),
     cmd("setup", "Interactive setup (login + create agent)"),
     cmd("login", "Re-authenticate session"),
     cmd("whoami", "Show current agent profile summary"),
@@ -519,6 +520,18 @@ async function main(): Promise<void> {
   // Commands that don't need API key
   if (command === "version") {
     console.log(VERSION);
+    return;
+  }
+
+  if (command === "init") {
+    if (!subcommand) {
+      console.error("Error: partner ID required. Usage: acp init <partner-id>");
+      process.exit(1);
+    }
+    const { readConfig, writeConfig } = await import("../src/lib/config.js");
+    const config = readConfig();
+    writeConfig({ ...config, PARTNER_ID: subcommand });
+    console.log(`Partner ID saved: ${subcommand}`);
     return;
   }
 

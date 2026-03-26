@@ -41,6 +41,7 @@ export interface ConfigJson {
     token: string;
   };
   LITE_AGENT_API_KEY?: string;
+  PARTNER_ID?: string;
   SELLER_PID?: number;
   OPENCLAW_BOUNTY_CRON_JOB_ID?: string;
   agents?: AgentEntry[];
