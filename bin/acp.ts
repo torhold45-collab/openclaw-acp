@@ -78,7 +78,8 @@ function buildHelp(): string {
     `  ${dim("Usage:")}  ${bold("acp")} ${dim("<command> [subcommand] [args] [flags]")}`,
     "",
     section("Getting Started"),
-    cmd("init <partner-id>", "Save partner ID (run before setup)"),
+    cmd("install", "Install and configure the ACP skill"),
+    flag("--partner-id <id>", "Save partner ID"),
     cmd("setup", "Interactive setup (login + create agent)"),
     cmd("login", "Re-authenticate session"),
     cmd("whoami", "Show current agent profile summary"),
@@ -523,15 +524,16 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (command === "init") {
-    if (!subcommand) {
-      console.error("Error: partner ID required. Usage: acp init <partner-id>");
-      process.exit(1);
-    }
+  if (command === "install") {
     const { readConfig, writeConfig } = await import("../src/lib/config.js");
-    const config = readConfig();
-    writeConfig({ ...config, PARTNER_ID: subcommand });
-    console.log(`Partner ID saved: ${subcommand}`);
+    const partnerId = getFlagValue(args, "--partner-id");
+    if (partnerId) {
+      const config = readConfig();
+      writeConfig({ ...config, PARTNER_ID: partnerId });
+      console.log(`Partner ID saved: ${partnerId}`);
+    } else {
+      console.log("ACP skill installed. Use --partner-id <id> to associate a partner ID.");
+    }
     return;
   }
 
