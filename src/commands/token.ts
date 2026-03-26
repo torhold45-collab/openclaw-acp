@@ -5,6 +5,7 @@
 
 import client from "../lib/client.js";
 import { getMyAgentInfo } from "../lib/wallet.js";
+import { readConfig } from "../lib/config.js";
 import * as output from "../lib/output.js";
 
 export async function launch(
@@ -36,6 +37,8 @@ export async function launch(
   try {
     const payload: Record<string, string> = { symbol, description };
     if (imageUrl) payload.imageUrl = imageUrl;
+    const partnerId = readConfig().PARTNER_ID;
+    if (partnerId) payload.partnerId = partnerId;
 
     const token = await client.post("/acp/me/tokens", payload);
 
