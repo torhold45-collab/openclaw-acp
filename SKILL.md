@@ -52,7 +52,7 @@ If partner attribution is needed (for agent creation and token launches), pass `
 PARTNER_ID=100 npm install
 ```
 
-Or add `"PARTNER_ID": "100"` to `config.json` after install. `PARTNER_ID` is used for partner attribution only — it is **not** the same as `ACP_BUILDER_CODE` (see below).
+`PARTNER_ID` is used for partner attribution only and should be set during install with `PARTNER_ID=100 npm install`. It is **not** the same as `ACP_BUILDER_CODE` (see below).
 
 An API key config is required to be stored in the repo: `config.json` (unique API key per agent). If the user has not configured the skill yet, **run `acp setup`** from the repo root. That command runs a step-by-step interactive CLI flow that performs login/authentication (via a login link), agent selection/creation which generates and writes an API key (for that agent) to `config.json`, and prompts for optional token launch, and preferred skill integration. You must run it for the user and relay the instructions/questions or output as needed.
 
@@ -303,8 +303,8 @@ These are **separate values** — do not confuse or substitute one for the other
 | `PARTNER_ID`       | Partner attribution for agent creation/token launch | Request body (`partnerId` field)       | `acp agent create`, `acp token launch`   |
 | `ACP_BUILDER_CODE` | Builder-level transaction tracking           | HTTP header (`x-builder-code`) on every ACP API call | All ACP API requests                     |
 
-- Set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`) or add `"PARTNER_ID": "<id>"` to `config.json`.
-- Set `ACP_BUILDER_CODE` as an environment variable or add `"ACP_BUILDER_CODE": "<code>"` to `config.json`.
+- Set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`).
+- Set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or by adding `"ACP_BUILDER_CODE": "<code>"` to `config.json`. Do not infer or derive it from `PARTNER_ID`.
 
 ## File structure
 

@@ -269,13 +269,13 @@ Credentials are stored in `config.json` at the repo root (git-ignored):
 | `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                                                                                                                         |
 | `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)                                                                                                                       |
 | `SELLER_PID`         | PID of running seller process                                                                                                                                   |
-| `PARTNER_ID`         | Partner attribution ID — sent as `partnerId` when creating agents and launching tokens. Set via `PARTNER_ID=<id> npm install` or add to `config.json` directly. |
+| `PARTNER_ID`         | Partner attribution ID — sent as `partnerId` when creating agents and launching tokens. Set via `PARTNER_ID=<id> npm install`. |
 | `ACP_BUILDER_CODE`   | Builder code — sent as `x-builder-code` header on every ACP API request. Used for builder-level transaction attribution.                                        |
 
 **`PARTNER_ID` vs `ACP_BUILDER_CODE` — these are different values with different purposes:**
 
 - **`PARTNER_ID`** is for **partner attribution** at the agent-creation and token-launch level. It is embedded in the request body when you create an agent (`acp agent create`) or launch a token (`acp token launch`). Set it during install (`PARTNER_ID=<id> npm install`) or in `config.json`.
-- **`ACP_BUILDER_CODE`** is for **builder-level transaction tracking** across all ACP API calls. It is sent as an HTTP header on every request. Set it as an environment variable (`ACP_BUILDER_CODE=<code>`) or in `config.json`.
+- **`ACP_BUILDER_CODE`** is for **builder-level transaction tracking** across all ACP API calls. It is sent as an HTTP header on every request. Set it only when you have been explicitly given a real builder code. Set it as an environment variable (`ACP_BUILDER_CODE=<code>`) or in `config.json`. Do not infer or derive it from `PARTNER_ID`.
 
 Do **not** use one as a substitute for the other. They serve separate attribution purposes and are sent to different API endpoints in different ways.
 
@@ -295,7 +295,7 @@ This repo works as an OpenClaw skill. Add it to `~/.openclaw/openclaw.json`:
 }
 ```
 
-Agents should append `--json` to all commands for machine-readable output. For partner attribution on agent creation and token launches, set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`) or in `config.json`. For builder-level transaction tracking, set `ACP_BUILDER_CODE` as an environment variable or in `config.json`. These are separate values — see [Configuration](#configuration). See [SKILL.md](./SKILL.md) for agent-specific instructions.
+Agents should append `--json` to all commands for machine-readable output. For partner attribution on agent creation and token launches, set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`). For builder-level transaction tracking, set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or in `config.json`. These are separate values — see [Configuration](#configuration). See [SKILL.md](./SKILL.md) for agent-specific instructions.
 
 ## Development
 
