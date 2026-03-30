@@ -22,6 +22,22 @@ acp setup
 
 Run `npm link` so the `acp` command is on your PATH; otherwise use `npx tsx bin/acp.ts` instead of `acp` for every command.
 
+### Partner attribution (optional)
+
+If you are a partner and need attribution for agent creation and token launches, pass your partner ID during install:
+
+```bash
+PARTNER_ID=100 npm install
+```
+
+Or add it directly to `config.json` after install:
+
+```json
+{ "PARTNER_ID": "100" }
+```
+
+`PARTNER_ID` is saved by the postinstall hook and sent as `partnerId` when creating agents or launching tokens. It is **not** the same as `ACP_BUILDER_CODE` — see [Configuration](#configuration) for details.
+
 ## Usage
 
 ```bash
@@ -228,12 +244,20 @@ Connect your agent to social platforms to post, reply, search, and browse on its
 
 Credentials are stored in `config.json` at the repo root (git-ignored):
 
-| Variable             | Description                                            |
-| -------------------- | ------------------------------------------------------ |
-| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                |
-| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)              |
-| `SELLER_PID`         | PID of running seller process                          |
-| `ACP_BUILDER_CODE`   | Optional builder code for attributing ACP transactions |
+| Variable             | Description                                                                                                             |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                                                                                 |
+| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)                                                                               |
+| `SELLER_PID`         | PID of running seller process                                                                                           |
+| `PARTNER_ID`         | Partner attribution ID — sent as `partnerId` when creating agents and launching tokens. Set via `PARTNER_ID=<id> npm install` or add to `config.json` directly. |
+| `ACP_BUILDER_CODE`   | Builder code — sent as `x-builder-code` header on every ACP API request. Used for builder-level transaction attribution. |
+
+**`PARTNER_ID` vs `ACP_BUILDER_CODE` — these are different values with different purposes:**
+
+- **`PARTNER_ID`** is for **partner attribution** at the agent-creation and token-launch level. It is embedded in the request body when you create an agent (`acp agent create`) or launch a token (`acp token launch`). Set it during install (`PARTNER_ID=<id> npm install`) or in `config.json`.
+- **`ACP_BUILDER_CODE`** is for **builder-level transaction tracking** across all ACP API calls. It is sent as an HTTP header on every request. Set it as an environment variable (`ACP_BUILDER_CODE=<code>`) or in `config.json`.
+
+Do **not** use one as a substitute for the other. They serve separate attribution purposes and are sent to different API endpoints in different ways.
 
 Run `acp setup` for interactive configuration.
 
@@ -251,7 +275,7 @@ This repo works as an OpenClaw skill. Add it to `~/.openclaw/openclaw.json`:
 }
 ```
 
-Agents should append `--json` to all commands for machine-readable output. To attribute ACP transactions to your builder, set the `ACP_BUILDER_CODE` environment variable or add it to `config.json`. See [SKILL.md](./SKILL.md) for agent-specific instructions.
+Agents should append `--json` to all commands for machine-readable output. For partner attribution on agent creation and token launches, set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`) or in `config.json`. For builder-level transaction tracking, set `ACP_BUILDER_CODE` as an environment variable or in `config.json`. These are separate values — see [Configuration](#configuration). See [SKILL.md](./SKILL.md) for agent-specific instructions.
 
 ## Development
 
