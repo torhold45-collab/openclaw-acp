@@ -2,6 +2,8 @@
 // Runs after `npm install`. Saves partner ID to config.json if provided via:
 //   PARTNER_ID=xxx npm install          (recommended)
 //   npm install --partner_id=xxx        (also supported)
+//
+// Always prints partner attribution status so users know the current state.
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -11,7 +13,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = resolve(__dirname, "..", "config.json");
 
 const partnerId = process.env.PARTNER_ID || process.env.npm_config_partner_id;
-if (!partnerId) process.exit(0);
 
 let config = {};
 if (existsSync(CONFIG_PATH)) {
@@ -20,6 +21,12 @@ if (existsSync(CONFIG_PATH)) {
   } catch {}
 }
 
-config.PARTNER_ID = partnerId;
-writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
-console.log(`[ACP] Partner ID saved: ${partnerId}`);
+if (partnerId) {
+  config.PARTNER_ID = partnerId;
+  writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
+  console.log(`[ACP] Partner ID saved: ${partnerId}`);
+} else if (config.PARTNER_ID) {
+  console.log(`[ACP] Partner ID (from config): ${config.PARTNER_ID}`);
+} else {
+  console.log("[ACP] Partner ID: not set (optional)");
+}
