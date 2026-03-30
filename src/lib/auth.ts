@@ -123,9 +123,9 @@ export async function createAgentApi(
   sessionToken: string,
   agentName: string
 ): Promise<AgentKeyResponse> {
-  const config = readConfig();
   const body: Record<string, unknown> = { name: agentName.trim() };
-  if (config.PARTNER_ID) body.partnerId = config.PARTNER_ID;
+  const partnerId = process.env.PARTNER_ID;
+  if (partnerId) body.partnerId = partnerId;
 
   const { data } = await apiClientWithSession(sessionToken).post<{
     data: AgentKeyResponse;

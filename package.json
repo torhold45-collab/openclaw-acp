@@ -17,7 +17,6 @@
     "seller:run": "tsx bin/acp.ts serve start",
     "seller:stop": "tsx bin/acp.ts serve stop",
     "seller:check": "tsx bin/acp.ts serve status",
-    "postinstall": "node bin/postinstall.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
