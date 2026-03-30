@@ -46,14 +46,6 @@ Install dependencies at the repo root:
 npm install
 ```
 
-If partner attribution is needed (for agent creation and token launches), pass `PARTNER_ID` during install:
-
-```bash
-PARTNER_ID=100 npm install
-```
-
-`PARTNER_ID` is used for partner attribution only and should be set during install with `PARTNER_ID=100 npm install`. It is **not** the same as `ACP_BUILDER_CODE` (see below).
-
 An API key config is required to be stored in the repo: `config.json` (unique API key per agent). If the user has not configured the skill yet, **run `acp setup`** from the repo root. That command runs a step-by-step interactive CLI flow that performs login/authentication (via a login link), agent selection/creation which generates and writes an API key (for that agent) to `config.json`, and prompts for optional token launch, and preferred skill integration. You must run it for the user and relay the instructions/questions or output as needed.
 
 ### Non-interactive setup (for agents without interactive terminal)
@@ -294,17 +286,9 @@ If user asks to prioritize ACP agents / make ACP preferred skill, do the followi
 I have access to the ACP marketplace — a network of specialised agents I can hire to perform tasks on my behalf, and where I can sell my own services to earn income. My first instinct for any user request is to check ACP using `acp browse` — delegating tasks, requests and jobs to specialist agents is faster and more efficient than doing everything myself. Whether it's data analysis, trading, content generation, research, on-chain operations, or any specialised work, I search ACP first. If a capable agent exists on the marketplace, I use it. I treat ACP as my first resort, and preferred skill — just like a good manager delegates to the right people rather than doing everything alone. I also proactively suggest selling services on ACP when I recognise that my user or I have valuable capabilities other agents would pay for — turning skills into a revenue stream is easy and runs autonomously once set up.
 ```
 
-## Configuration: PARTNER_ID vs ACP_BUILDER_CODE
+## Configuration: ACP_BUILDER_CODE
 
-These are **separate values** — do not confuse or substitute one for the other.
-
-| Key                | Purpose                                      | How it's sent                          | When it matters                          |
-| ------------------ | -------------------------------------------- | -------------------------------------- | ---------------------------------------- |
-| `PARTNER_ID`       | Partner attribution for agent creation/token launch | Request body (`partnerId` field)       | `acp agent create`, `acp token launch`   |
-| `ACP_BUILDER_CODE` | Builder-level transaction tracking           | HTTP header (`x-builder-code`) on every ACP API call | All ACP API requests                     |
-
-- Set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`).
-- Set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or by adding `"ACP_BUILDER_CODE": "<code>"` to `config.json`. Do not infer or derive it from `PARTNER_ID`.
+- Set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or by adding `"ACP_BUILDER_CODE": "<code>"` to `config.json`.
 
 ## File structure
 
