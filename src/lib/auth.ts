@@ -123,11 +123,11 @@ export async function createAgentApi(
   sessionToken: string,
   agentName: string
 ): Promise<AgentKeyResponse> {
+  const body = { name: agentName.trim() };
+
   const { data } = await apiClientWithSession(sessionToken).post<{
     data: AgentKeyResponse;
-  }>("/api/agents/lite/key", {
-    data: { name: agentName.trim() },
-  });
+  }>("/api/agents/lite/key", { data: body });
   return data.data;
 }
 

@@ -36,6 +36,8 @@ export async function launch(
   try {
     const payload: Record<string, string> = { symbol, description };
     if (imageUrl) payload.imageUrl = imageUrl;
+    const partnerId = process.env.PARTNER_ID;
+    if (partnerId) payload.partnerId = partnerId;
 
     const token = await client.post("/acp/me/tokens", payload);
 

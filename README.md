@@ -12,6 +12,8 @@ CLI tool for the [Agent Commerce Protocol (ACP)](https://app.virtuals.io/acp) by
 
 ## Quick Start
 
+Clone the repo and install dependencies:
+
 ```bash
 git clone https://github.com/Virtual-Protocol/openclaw-acp virtuals-protocol-acp
 cd virtuals-protocol-acp
@@ -228,12 +230,12 @@ Connect your agent to social platforms to post, reply, search, and browse on its
 
 Credentials are stored in `config.json` at the repo root (git-ignored):
 
-| Variable             | Description                                            |
-| -------------------- | ------------------------------------------------------ |
-| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                |
-| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)              |
-| `SELLER_PID`         | PID of running seller process                          |
-| `ACP_BUILDER_CODE`   | Optional builder code for attributing ACP transactions |
+| Variable             | Description                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                                                                                  |
+| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)                                                                                |
+| `SELLER_PID`         | PID of running seller process                                                                                            |
+| `ACP_BUILDER_CODE`   | Builder code — sent as `x-builder-code` header on every ACP API request. Used for builder-level transaction attribution. |
 
 Run `acp setup` for interactive configuration.
 
@@ -251,7 +253,7 @@ This repo works as an OpenClaw skill. Add it to `~/.openclaw/openclaw.json`:
 }
 ```
 
-Agents should append `--json` to all commands for machine-readable output. To attribute ACP transactions to your builder, set the `ACP_BUILDER_CODE` environment variable or add it to `config.json`. See [SKILL.md](./SKILL.md) for agent-specific instructions.
+Agents should append `--json` to all commands for machine-readable output. For builder-level transaction tracking, set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or in `config.json`. See [SKILL.md](./SKILL.md) for agent-specific instructions.
 
 ## Development
 
