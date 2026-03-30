@@ -12,15 +12,7 @@ CLI tool for the [Agent Commerce Protocol (ACP)](https://app.virtuals.io/acp) by
 
 ## Quick Start
 
-Clone the repo and install dependencies — choose one of the two paths below.
-
-<table>
-<tr>
-<th>Standard install</th>
-<th>Install with partner attribution</th>
-</tr>
-<tr>
-<td>
+Clone the repo and install dependencies:
 
 ```bash
 git clone https://github.com/Virtual-Protocol/openclaw-acp virtuals-protocol-acp
@@ -30,33 +22,7 @@ npm link
 acp setup
 ```
 
-</td>
-<td>
-
-```bash
-git clone https://github.com/Virtual-Protocol/openclaw-acp virtuals-protocol-acp
-cd virtuals-protocol-acp
-PARTNER_ID=100 npm install   # replace 100 with your ID
-npm link
-acp setup
-```
-
-</td>
-</tr>
-</table>
-
 Run `npm link` so the `acp` command is on your PATH; otherwise use `npx tsx bin/acp.ts` instead of `acp` for every command.
-
-> **Note:** `PARTNER_ID` is **optional**. Everything works without it. It is only needed if you are a partner and want attribution for agent creation and token launches. You can always add it later by re-running `PARTNER_ID=<id> npm install` or editing `config.json` directly.
-
-The postinstall step prints a status line so you can confirm whether partner attribution is active:
-
-```
-[ACP] Partner ID saved: 100          ← set
-[ACP] Partner ID: not set (optional) ← not set, and that's fine
-```
-
-`PARTNER_ID` is saved by the postinstall hook and sent as `partnerId` when creating agents or launching tokens. It is **not** the same as `ACP_BUILDER_CODE` — see [Configuration](#configuration) for details.
 
 ## Usage
 
@@ -264,20 +230,12 @@ Connect your agent to social platforms to post, reply, search, and browse on its
 
 Credentials are stored in `config.json` at the repo root (git-ignored):
 
-| Variable             | Description                                                                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                                                                                                                         |
-| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)                                                                                                                       |
-| `SELLER_PID`         | PID of running seller process                                                                                                                                   |
-| `PARTNER_ID`         | Partner attribution ID — sent as `partnerId` when creating agents and launching tokens. Set via `PARTNER_ID=<id> npm install`. |
-| `ACP_BUILDER_CODE`   | Builder code — sent as `x-builder-code` header on every ACP API request. Used for builder-level transaction attribution.                                        |
-
-**`PARTNER_ID` vs `ACP_BUILDER_CODE` — these are different values with different purposes:**
-
-- **`PARTNER_ID`** is for **partner attribution** at the agent-creation and token-launch level. It is embedded in the request body when you create an agent (`acp agent create`) or launch a token (`acp token launch`). Set it during install (`PARTNER_ID=<id> npm install`) or in `config.json`.
-- **`ACP_BUILDER_CODE`** is for **builder-level transaction tracking** across all ACP API calls. It is sent as an HTTP header on every request. Set it only when you have been explicitly given a real builder code. Set it as an environment variable (`ACP_BUILDER_CODE=<code>`) or in `config.json`. Do not infer or derive it from `PARTNER_ID`.
-
-Do **not** use one as a substitute for the other. They serve separate attribution purposes and are sent to different API endpoints in different ways.
+| Variable             | Description                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `LITE_AGENT_API_KEY` | API key for the Virtuals Lite Agent API                                                                                  |
+| `SESSION_TOKEN`      | Auth session (30min expiry, auto-managed)                                                                                |
+| `SELLER_PID`         | PID of running seller process                                                                                            |
+| `ACP_BUILDER_CODE`   | Builder code — sent as `x-builder-code` header on every ACP API request. Used for builder-level transaction attribution. |
 
 Run `acp setup` for interactive configuration.
 
@@ -295,7 +253,7 @@ This repo works as an OpenClaw skill. Add it to `~/.openclaw/openclaw.json`:
 }
 ```
 
-Agents should append `--json` to all commands for machine-readable output. For partner attribution on agent creation and token launches, set `PARTNER_ID` during install (`PARTNER_ID=<id> npm install`). For builder-level transaction tracking, set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or in `config.json`. These are separate values — see [Configuration](#configuration). See [SKILL.md](./SKILL.md) for agent-specific instructions.
+Agents should append `--json` to all commands for machine-readable output. For builder-level transaction tracking, set `ACP_BUILDER_CODE` only when you have been explicitly given a real builder code, as an environment variable or in `config.json`. See [SKILL.md](./SKILL.md) for agent-specific instructions.
 
 ## Development
 
