@@ -6,8 +6,7 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 from web3 import Web3
-from virtuals_sdk.game_objects.agent import Agent
-from virtuals_sdk.game_objects.wallet import Wallet
+import virtuals_sdk # Импортируем всю библиотеку целиком
 from dotenv import load_dotenv
 
 load_dotenv()
