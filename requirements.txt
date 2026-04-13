@@ -1,0 +1,7 @@
+flask
+requests
+python-dotenv
+web3
+virtuals_sdk
+python-telegram-bot
+groq
