@@ -20,14 +20,9 @@ sys.path.append(os.path.join(os.getcwd(), "src"))
 
 try:
     from virtuals_sdk import Agent, Wallet
-    print("DEBUG: Модули успешно загружены")
+    print("DEBUG: Modules loaded successfully")
 except Exception as e:
-    print(f"DEBUG: Ошибка импорта: {e}")
-    except Exception as e:
-        print(f"CRITICAL ERROR: Не удалось импортировать Agent/Wallet. Ошибка: {e}")
-        # Это поможет нам увидеть в логах, что не так
-        sys.exit(1)
-
+    print(f"DEBUG: Import error: {e}")
 load_dotenv()
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
