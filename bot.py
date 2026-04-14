@@ -6,7 +6,7 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 from web3 import Web3
-from virtuals_sdk import Agent, Wallet
+from virtuals_sdk.main import Agent, Wallet
 from dotenv import load_dotenv
 
 load_dotenv()
