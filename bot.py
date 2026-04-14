@@ -1,17 +1,3 @@
-import os
-import sys
-import threading
-import requests
-import time
-from flask import Flask
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
-from web3 import Web3
-from dotenv import load_dotenv
-
-# Добавляем путь к папке src ПЕРЕД импортом SDK
-sys.path.append(os.path.join(os.getcwd(), "src"))
-
 import sys
 import os
 
@@ -23,7 +9,6 @@ try:
     print("DEBUG: Modules loaded successfully")
 except Exception as e:
     print(f"DEBUG: Import error: {e}")
-load_dotenv()
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
 Ты — Джина, невероятно умная и ласковая девушка-трейдер. 
