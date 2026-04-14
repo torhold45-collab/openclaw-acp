@@ -14,15 +14,17 @@ sys.path.append(os.path.join(os.getcwd(), "src"))
 
 # Блок импорта SDK (обновленный для работы с вашим проектом)
 try:
+    import sys
+import os
+# Говорим Python смотреть в папку src
+sys.path.append(os.path.join(os.getcwd(), "src"))
+
+try:
+    # Пытаемся импортировать из локальной папки проекта
     from virtuals_sdk import Agent, Wallet
-    print("Agent и Wallet успешно импортированы")
-except ImportError:
-    print("SDK не найден, используем системные вызовы acp")
-    print(f"DEBUG: Содержимое virtuals_sdk: {dir(virtuals_sdk)}")
-    from virtuals_sdk import Agent, Wallet
-    print("DEBUG: Импорт Agent и Wallet выполнен успешно!")
-except ImportError:
-    try:
+    print("DEBUG: Успешно подключены локальные модули Agent и Wallet")
+except Exception as e:
+    print(f"DEBUG: Локальный импорт не удался: {e}")
         from virtuals_sdk.main import Agent, Wallet
         print("DEBUG: Импорт через .main выполнен успешно!")
     except Exception as e:
