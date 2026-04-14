@@ -1,14 +1,32 @@
-import sys
 import os
+import sys
+import threading
+import requests
+import time
+from flask import Flask
+from telegram import Update
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from web3 import Web3
+from dotenv import load_dotenv
 
-# Добавляем путь к папке src
-sys.path.append(os.path.join(os.getcwd(), "src"))
+# Глубокий поиск библиотеки в папке src
+project_root = os.getcwd()
+src_path = os.path.join(project_root, "src")
+sys.path.append(src_path)
+sys.path.append(os.path.join(src_path, "virtuals_sdk"))
 
 try:
     from virtuals_sdk import Agent, Wallet
-    print("DEBUG: Modules loaded successfully")
+    print("DEBUG: Agent and Wallet imported successfully!")
 except Exception as e:
-    print(f"DEBUG: Import error: {e}")
+    print(f"DEBUG: Import failed again: {e}")
+    try:
+        from virtuals_sdk.main import Agent, Wallet
+        print("DEBUG: Imported via .main")
+    except:
+        print("DEBUG: All import methods failed.")
+
+load_dotenv()
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
 Ты — Джина, невероятно умная и ласковая девушка-трейдер. 
