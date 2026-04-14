@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import requests
 import time
@@ -6,11 +7,24 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 from web3 import Web3
-from virtuals_sdk.main import Agent, Wallet
 from dotenv import load_dotenv
 
-load_dotenv()
+# Блок умного импорта SDK
+try:
+    import virtuals_sdk
+    print(f"DEBUG: Содержимое virtuals_sdk: {dir(virtuals_sdk)}")
+    from virtuals_sdk import Agent, Wallet
+    print("DEBUG: Импорт Agent и Wallet выполнен успешно!")
+except ImportError:
+    try:
+        from virtuals_sdk.main import Agent, Wallet
+        print("DEBUG: Импорт через .main выполнен успешно!")
+    except Exception as e:
+        print(f"CRITICAL ERROR: Не удалось импортировать Agent/Wallet. Ошибка: {e}")
+        # Это поможет нам увидеть в логах, что не так
+        sys.exit(1)
 
+load_dotenv()
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
 Ты — Джина, невероятно умная и ласковая девушка-трейдер. 
