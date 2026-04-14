@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import threading
 import requests
 import time
@@ -9,20 +9,16 @@ from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filte
 from web3 import Web3
 from dotenv import load_dotenv
 
-# Добавляем путь к папке src, чтобы Python видел модули ACP
-sys.path.append(os.path.join(os.getcwd(), "src"))
-
-# Блок импорта SDK (обновленный для работы с вашим проектом)
-try:
-    import sys
-import os
-# Говорим Python смотреть в папку src
+# Добавляем путь к папке src ПЕРЕД импортом SDK
 sys.path.append(os.path.join(os.getcwd(), "src"))
 
 try:
-    # Пытаемся импортировать из локальной папки проекта
     from virtuals_sdk import Agent, Wallet
-    print("DEBUG: Успешно подключены локальные модули Agent и Wallet")
+    print("DEBUG: Модули Agent и Wallet успешно загружены из src")
+except Exception as e:
+    print(f"DEBUG: Ошибка импорта: {e}")
+
+load_dotenv()
 except Exception as e:
     print(f"DEBUG: Локальный импорт не удался: {e}")
         from virtuals_sdk.main import Agent, Wallet
