@@ -2,6 +2,6 @@ flask
 requests
 python-dotenv
 web3
-virtuals-sdk
+git+https://github.com
 python-telegram-bot
 groq
