@@ -1,5 +1,5 @@
-import os
 import sys
+import os
 import threading
 import requests
 import time
@@ -9,9 +9,15 @@ from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filte
 from web3 import Web3
 from dotenv import load_dotenv
 
-# Блок умного импорта SDK
+# Добавляем путь к папке src, чтобы Python видел модули ACP
+sys.path.append(os.path.join(os.getcwd(), "src"))
+
+# Блок импорта SDK (обновленный для работы с вашим проектом)
 try:
-    import virtuals_sdk
+    from virtuals_sdk import Agent, Wallet
+    print("Agent и Wallet успешно импортированы")
+except ImportError:
+    print("SDK не найден, используем системные вызовы acp")
     print(f"DEBUG: Содержимое virtuals_sdk: {dir(virtuals_sdk)}")
     from virtuals_sdk import Agent, Wallet
     print("DEBUG: Импорт Agent и Wallet выполнен успешно!")
