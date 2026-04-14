@@ -12,17 +12,17 @@ from dotenv import load_dotenv
 # Добавляем путь к папке src ПЕРЕД импортом SDK
 sys.path.append(os.path.join(os.getcwd(), "src"))
 
+import sys
+import os
+
+# Добавляем путь к папке src
+sys.path.append(os.path.join(os.getcwd(), "src"))
+
 try:
     from virtuals_sdk import Agent, Wallet
-    print("DEBUG: Модули Agent и Wallet успешно загружены из src")
+    print("DEBUG: Модули успешно загружены")
 except Exception as e:
     print(f"DEBUG: Ошибка импорта: {e}")
-
-load_dotenv()
-except Exception as e:
-    print(f"DEBUG: Локальный импорт не удался: {e}")
-        from virtuals_sdk.main import Agent, Wallet
-        print("DEBUG: Импорт через .main выполнен успешно!")
     except Exception as e:
         print(f"CRITICAL ERROR: Не удалось импортировать Agent/Wallet. Ошибка: {e}")
         # Это поможет нам увидеть в логах, что не так
