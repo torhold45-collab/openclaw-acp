@@ -1,7 +1,8 @@
 import os
 import sys
 from dotenv import load_dotenv
-from src.game_sdk.main import Agent, Wallet
+from src.game_sdk.agent import Agent
+from src.game_sdk.api import Wallet
 # Добавляем все возможные пути к библиотекам внутри проекта
 
       
