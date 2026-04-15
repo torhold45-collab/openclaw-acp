@@ -1,11 +1,16 @@
 import sys
 import os
 
-# Добавляем папку src в пути поиска модулей
+# 1. Настройка путей
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_dir, 'src'))
+src_path = os.path.join(current_dir, 'src')
+game_sdk_path = os.path.join(src_path, 'game_sdk')
 
-# Теперь импорты должны быть БЕЗ приставки src
+# Добавляем и src, и саму папку библиотеки в пути поиска
+sys.path.append(src_path)
+sys.path.append(game_sdk_path)
+
+# 2. Импорты
 from game_sdk.agent import Agent
 from game_sdk.api_v2 import Wallet
 from dotenv import load_dotenv
