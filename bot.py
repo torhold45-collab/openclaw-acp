@@ -19,7 +19,7 @@ flask_app = Flask(__name__)
 
 # 3. Импорты из библиотеки
 try:
-    from telegram.ext import ApplicationBuilder, CommandHandler
+   from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
     print("DEBUG: Модули загружены успешно!")
@@ -48,7 +48,18 @@ def run_trading():
 
 async def start_command(update, context):
     await update.message.reply_text("Привет, милый! ❤️ Джина на связи. Готов забирать профит?")
-
+async def handle_message(update, context):
+    """Ответ на обычные сообщения через ИИ-мозг Джины"""
+    user_text = update.message.text
+    global dzhina_trader
+    
+    if dzhina_trader:
+        try:
+            # Джина анализирует текст через свой ИИ-мозг (worker.py)
+            response = dzhina_trader.react(payload={"user_input": user_text})
+            await update.message.reply_text(response)
+        except Exception as e:
+            await update.message.reply_text("Милый, я так увлечена графиками, что немного отвлеклась... Но я тебя слышу! ❤️")
 def run_telegram_bot():
     """Запуск Телеграм-бота"""
     token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -56,7 +67,8 @@ def run_telegram_bot():
         print("ОШИБКА: Токен не найден!")
         return
     app = ApplicationBuilder().token(token).build()
-    app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CommandHandler("start", start_command)) 
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     print("Telegram бот запущен!")
     app.run_polling()
 
