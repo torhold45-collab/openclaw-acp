@@ -1,26 +1,28 @@
 import sys
 import os
-from flask import Flask # ИСПРАВИТ NameError: 'Flask' is not defined
+from flask import Flask
 from dotenv import load_dotenv
 
-# 1. Настройка путей, чтобы библиотека видела саму себя
+# Настройка путей (ВАЖНО: ставим src в начало поиска)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
-
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-# 2. Импорты из вашей библиотеки
+# Теперь импорты должны сработать
 try:
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
-    print("DEBUG: Модули успешно загружены")
 except ImportError as e:
     print(f"DEBUG: Ошибка импорта: {e}")
 
-# 3. Инициализация приложения
 load_dotenv()
-flask_app = Flask(__name__) # Теперь Flask определен
+flask_app = Flask(__name__)
+
+# --- Инициализация приложения ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000)) 
+    flask_app.run(host='0.0.0.0', port=port)
 
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
