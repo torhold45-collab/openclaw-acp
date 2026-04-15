@@ -4,14 +4,14 @@ import threading
 from flask import Flask
 from dotenv import load_dotenv
 
-# 1. Настройка путей (ВАЖНО делать в самом начале)
+# 1. Настройка путей (Исправляет ошибки импорта библиотеки)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
 game_sdk_path = os.path.join(src_path, 'game_sdk')
 
 for p in [src_path, game_sdk_path]:
-            if p not in sys.path:
-            sys.path.insert(0, p)
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 # 2. Инициализация Flask
 load_dotenv()
