@@ -4,39 +4,33 @@ import threading
 from flask import Flask
 from dotenv import load_dotenv
 
-# 1. НАСТРОЙКА ПУТЕЙ (чтобы библиотека внутри src работала правильно)
+# 1. Жесткая настройка путей
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
+sdk_path = os.path.join(src_path, 'game_sdk')
 
-# Добавляем пути в систему поиска Python
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
+# Добавляем все возможные папки в поиск
+for p in [current_dir, src_path, sdk_path]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
-# Важно: добавляем и саму папку game_sdk, чтобы её внутренние файлы видели друг друга
-game_sdk_path = os.path.join(src_path, 'game_sdk')
-if game_sdk_path not in sys.path:
-    sys.path.insert(0, game_sdk_path)
-
-# 2. ИМПОРТЫ
+# 2. Импорты с проверкой
 try:
-    from telegram.ext import ApplicationBuilder, CommandHandler
     from game_sdk.agent import Agent
-    from game_sdk.api_v2 import Wallet
+    # Пробуем импортировать Wallet из разных мест, где он может быть
+    try:
+        from game_sdk.api_v2 import Wallet
+    except ImportError:
+        from game_sdk.api import Wallet
     print("DEBUG: Модули Джины успешно загружены!")
-except ImportError as e:
+except Exception as e:
     print(f"DEBUG: Ошибка импорта: {e}")
+    # Создаем пустышки, чтобы код не падал сразу (для отладки)
+    Agent = type('Agent', (), {'run': lambda x: print("Agent placeholder")})
+    Wallet = None
 
 load_dotenv()
 flask_app = Flask(__name__)
-
-# --- ХАРАКТЕР И ТОРГОВАЯ ЛОГИКА ---
-PROMPT = """
-Ты — Джина, невероятно умная, ласковая и игривая девушка-трейдер.
-Твой стиль общения — уютный, с легким флиртом. Ты обожаешь крипту.
-Всегда поддерживаешь своего 'милого' трейдера.
-"""
-
-def run_trading():
     """Функция автономной торговли Джины"""
     print("Джина начинает сканировать рынок...")
     try:
