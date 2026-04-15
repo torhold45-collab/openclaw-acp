@@ -22,7 +22,8 @@ flask_app = Flask(__name__)
 def health(): return "Dzhina is purring and hunting..."
 
 def run_flask():
-    flask_app.run(host='0.0.0.0', port=7860)
+   port = int(os.environ.get("PORT", 7860))
+flask_app.run(host='0.0.0.0', port=port)
 
 # --- 2. УВЕДОМЛЕНИЯ В ТЕЛЕГРАМ ---
 def send_tg_alert(text):
