@@ -3,29 +3,7 @@ import sys
 from dotenv import load_dotenv
 from virtuals_sdk import Agent, Wallet
 # Добавляем все возможные пути к библиотекам внутри проекта
-base_path = os.getcwd()
-paths = [
-    base_path,
-    os.path.join(base_path, "src"),
-    os.path.join(base_path, "src", "virtuals_sdk"),
-]
-for p in paths:
-    if p not in sys.path:
-        sys.path.append(p)
 
-try:
-    # Пытаемся импортировать напрямую из папки src
-    from src.virtuals_sdk.main import Agent, Wallet
-    print("DEBUG: Успешно импортировано из src.virtuals_sdk.main")
-except ImportError:
-    try:
-        from virtuals_sdk import Agent, Wallet
-        print("DEBUG: Успешно импортировано напрямую")
-    except Exception as e:
-        print(f"CRITICAL ERROR: Не удалось найти модули Agent/Wallet. Ошибка: {e}")
-        # Выведем список файлов, чтобы понять, где они
-        print(f"Файлы в src: {os.listdir(os.path.join(base_path, 'src'))}")
-    except:
         print("DEBUG: All import methods failed.")
 
 load_dotenv()
