@@ -1,20 +1,24 @@
 import sys
 import os
 
-# 1. Настройка путей
+# 1. Определяем пути к папкам
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
-game_sdk_path = os.path.join(src_path, 'game_sdk')
 
-# Добавляем и src, и саму папку библиотеки в пути поиска
-sys.path.append(src_path)
-sys.path.append(game_sdk_path)
+# 2. Добавляем ПАПКУ src в пути поиска, чтобы Python видел 'game_sdk' как пакет
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
-# 2. Импорты
-from game_sdk.agent import Agent
-from game_sdk.api_v2 import Wallet
+# 3. Чистые импорты (теперь Python увидит папку game_sdk внутри src)
+try:
+    from game_sdk.agent import Agent
+    from game_sdk.api_v2 import Wallet
+    print("DEBUG: Модули успешно импортированы")
+except ImportError as e:
+    print(f"DEBUG: Ошибка импорта: {e}")
+    # Если Wallet не в api_v2, попробуйте просто: from game_sdk.agent import Wallet
+
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # --- Твой нежный голос, хранитель кода ---
