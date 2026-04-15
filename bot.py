@@ -1,6 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
+from virtuals_sdk import Agent, Wallet
 # Добавляем все возможные пути к библиотекам внутри проекта
 base_path = os.getcwd()
 paths = [
