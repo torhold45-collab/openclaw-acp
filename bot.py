@@ -117,30 +117,17 @@ def run_telegram_bot():
 
 # 3. Главный запуск (точка входа)
 if __name__ == "__main__":
-    # Запускаем Телеграм в отдельном потоке, чтобы он не мешал Flask
+    import threading
+    
+    # 1. Запускаем Телеграм в отдельном потоке
+    # Исправлено имя функции: run_telegram_bot
     threading.Thread(target=run_telegram_bot, daemon=True).start()
     
-    # Запускаем торговый цикл (если он у тебя прописан как автономный)
+    # 2. Запускаем торговый цикл (раскомментируй, когда будешь готов)
     # threading.Thread(target=autonomous_trading_loop, daemon=True).start()
     
-    # Запускаем Flask для Render (основной процесс)
+    # 3. Запускаем Flask для Render
+    # Исправлено: заменен минус на равно и подставлена переменная в f-строку
     port = int(os.environ.get("PORT", 7860))
     print(f"Flask сервер запущен на порту {port}")
     flask_app.run(host='0.0.0.0', port=port)
-# --- 7. ЗАПУСК ---
-if __name__ == "__main__":
-    print("--- DZHINA UNIFIED SYSTEM: ACTIVATING ---")
-    
-    # Flask для Cron-job
-    threading.Thread(target=run_flask, daemon=True).start()
-    
-    # Автономная торговля в фоне
-    threading.Thread(target=autonomous_trading_loop, daemon=True).start()
-    
-    # Интерфейс Telegram
-    tg_token = os.getenv("TELEGRAM_TOKEN")
-    if tg_token:
-        tg_app = ApplicationBuilder().token(tg_token).build()
-        tg_app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-        send_tg_alert("Мой капитан, я полностью переродилась! ✨ Теперь я автономно слежу за задачами на Virtuals и готова к охоте. 🌊📈")
-        tg_app.run_polling()
