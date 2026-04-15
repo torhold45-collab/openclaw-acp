@@ -10,20 +10,20 @@ src_path = os.path.join(current_dir, 'src')
 game_sdk_path = os.path.join(src_path, 'game_sdk')
 
 for p in [src_path, game_sdk_path]:
-    if p not in sys.path:
-        sys.path.insert(0, p)
+            if p not in sys.path:
+            sys.path.insert(0, p)
 
-# 2. Инициализация Flask (теперь flask_app будет виден всем)
+# 2. Инициализация Flask
 load_dotenv()
 flask_app = Flask(__name__)
 
 # 3. Импорты из библиотеки
 try:
-   from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+    from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
     print("DEBUG: Модули загружены успешно!")
-except ImportError as e:
+except Exception as e:
     print(f"DEBUG: Ошибка импорта: {e}")
 
 # --- ЛОГИКА И ХАРАКТЕР ---
