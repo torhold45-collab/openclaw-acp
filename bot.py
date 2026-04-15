@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 from virtuals_sdk import Agent, Wallet
 # Добавляем все возможные пути к библиотекам внутри проекта
 
-        print("DEBUG: All import methods failed.")
-
+      
 load_dotenv()
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
