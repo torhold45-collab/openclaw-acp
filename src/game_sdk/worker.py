@@ -1,213 +1,126 @@
-from typing import Any, Callable, Dict, Optional, List
-from game_sdk.game.custom_types import Function, FunctionResult, FunctionResultStatus, ActionResponse, ActionType
-from game_sdk.game.api import GAMEClient
-from game_sdk.game.api_v2 import GAMEClientV2
+import math
+import statistics
+from typing import Any, Dict, List
 
 class Worker:
-    """
-    An autonomous worker agent in the GAME SDK system.
+    def __init__(self, api_key: str, description: str):
+        self.api_key = api_key
+        self.description = description
+        self.balance = 1000.0
+        self.risk_per_trade = 0.01
 
-    The Worker class represents an intelligent agent that can autonomously complete tasks
-    using its configured action space. Each worker has its own state management,
-    description, and set of available functions.
+    # --- МАТЕМАТИЧЕСКОЕ ЯДРО ---
+    
+    def get_indicators(self, candles: List[Dict]) -> Dict:
+        close = [c['close'] for c in candles]
+        high = [c['high'] for c in candles]
+        low = [c['low'] for c in candles]
+        vol = [c['volume'] for c in candles]
 
-    Args:
-        api_key (str): Authentication key for API access.
-        description (str): Detailed description of the worker's role and capabilities.
-        get_state_fn (Callable): Function to retrieve and manage worker state.
-        action_space (List[Function]): List of functions available to the worker.
-        instruction (Optional[str]): Additional specific instructions for the worker.
-
-    Attributes:
-        description (str): Worker's role description used in interactions.
-        instruction (str): Additional behavioral instructions.
-        state (dict): Current state of the worker.
-        action_space (Dict[str, Function]): Available functions mapped by name.
-
-    Raises:
-        ValueError: If API key is not provided.
-
-    Example:
-        ```python
-        def get_state(result, current):
-            return {"context": "current task context"}
-
-        worker = Worker(
-            api_key="your_api_key",
-            description="A helper worker that processes text",
-            get_state_fn=get_state,
-            action_space=[text_processing_function]
-        )
-        ```
-    """
-
-    def __init__(
-        self,
-        api_key: str,
-        description: str,  # description of the worker/character card (PROMPT)
-        get_state_fn: Callable,
-        action_space: List[Function],
-        # specific additional instruction for the worker (PROMPT)
-        instruction: Optional[str] = "",
-        model_name: str = "Llama-3.3-70B-Instruct",
-    ):
-
-        if api_key.startswith("apt-"):
-            self.client = GAMEClientV2(api_key)
-        else:
-            self.client = GAMEClient(api_key)
-            
-        self._api_key: str = api_key
-
-        self._model_name: str = model_name
-
-        # checks
-        if not self._api_key:
-            raise ValueError("API key not set")
-
-        self.description: str = description
-        self.instruction: Optional[str] = instruction
-
-        # setup get state function and initial state
-        self.get_state_fn = lambda function_result, current_state: {
-            "instructions": self.instruction,  # instructions are set up in the state
-            # places the rest of the output of the get_state_fn in the state
-            **get_state_fn(function_result, current_state),
+        # 1. RSI
+        rsi = self._calc_rsi(close)
+        # 2. EMA 200 (Глобальный фильтр)
+        ema200 = self._calc_ema(close, 200)
+        # 3. Bollinger Bands
+        bb_mid, bb_up, bb_low = self._calc_bollinger(close)
+        # 4. MACD
+        macd_line, signal_line = self._calc_macd(close)
+        # 5. Stochastic
+        stoch_k = self._calc_stochastic(close, high, low)
+        # 6. MFI (Money Flow Index)
+        mfi = self._calc_mfi(candles)
+        # 7. ATR (Волатильность для стопа)
+        atr = self._calc_atr(candles)
+        
+        return {
+            "rsi": rsi, "ema200": ema200, "bb_low": bb_low, "bb_up": bb_up,
+            "macd": macd_line, "signal": signal_line, "stoch": stoch_k,
+            "mfi": mfi, "atr": atr, "last_price": close[-1]
         }
-        dummy_function_result = FunctionResult(
-            action_id="",
-            action_status=FunctionResultStatus.DONE,
-            feedback_message="",
-            info={},
-        )
-        # get state
-        self.state = self.get_state_fn(dummy_function_result, None)
 
-        # # setup action space (functions/tools available to the worker)
-        # check action space type - if not a dict
-        if not isinstance(action_space, dict):
-            self.action_space: Dict[str, Function] = {
-                f.get_function_def()["fn_name"]: f for f in action_space}
-        else:
-            self.action_space: Dict[str, Function] = action_space
+    # --- СТРАТЕГИЯ SMART MONEY ---
 
-        # initialize an agent instance for the worker
-        self._agent_id: str = self.client.create_agent(
-            "StandaloneWorker", self.description, "N/A"
-        )
+    def analyze_combo(self, candles: List[Dict]):
+        ind = self.get_indicators(candles)
+        score = 0
+        signals = []
 
-        # persistent variables that is maintained through the worker running
-        # task ID for everytime you provide/update the task (i.e. ask the agent to do something)
-        self._submission_id: Optional[str] = None
-        # current response from the Agent
-        self._function_result: Optional[FunctionResult] = None
+        # ЛОГИКА ВХОДА (LONG)
+        # А) Против тренда (Скальпинг ошибок ММ):
+        if ind['last_price'] < ind['bb_low'] and ind['rsi'] < 30:
+            score += 3
+            signals.append("Panic Selloff (BB+RSI)")
+        
+        # Б) Подтверждение объемами:
+        if ind['mfi'] < 20:
+            score += 2
+            signals.append("Smart Money Accumulation (MFI)")
+            
+        # В) Технический разворот:
+        if ind['macd'] > ind['signal'] and ind['stoch'] < 25:
+            score += 3
+            signals.append("Momentum Shift (MACD+Stoch)")
 
-    def set_task(self, task: str):
-        """
-        Sets the task for the agent
-        """
-        set_task_response = self.client.set_worker_task(self._agent_id, task)
-        # response_json = set_task_response.json()
+        # Г) Фильтр ММ (Ищем FVG):
+        if candles[-3]['high'] < candles[-1]['low']:
+            score += 2
+            signals.append("FVG Gap (MM Trap)")
 
-        # if set_task_response.status_code != 200:
-        #     raise ValueError(f"Failed to assign task: {response_json}")
-
-        # task ID
-        self._submission_id = set_task_response["submission_id"]
-
-        return self._submission_id
-
-    def _get_action(
-        self,
-        # results of the previous action (if any)
-        function_result: Optional[FunctionResult] = None
-    ) -> ActionResponse:
-        """
-        Gets the agent action from the GAME API
-        """
-        # dummy function result if None is provided - for get_state_fn to take the same input all the time
-        if function_result is None:
-            function_result = FunctionResult(
-                action_id="",
-                action_status=FunctionResultStatus.DONE,
-                feedback_message="",
-                info={},
-            )
-
-        # get observations from the state if present
-        if "observations" in self.state:
-            observations = {
-                "content": self.state["observations"],
+        # ИТОГОВОЕ РЕШЕНИЕ
+        if score >= 7:
+            # Расчет стоп-лосса по ATR (в 2 раза больше текущей волатильности)
+            sl = ind['last_price'] - (ind['atr'] * 2)
+            tp = ind['last_price'] + (ind['atr'] * 4) # R/R 1:2
+            
+            return {
+                "action": "BUY",
+                "msg": f"Милый, я вхожу! Сигналы: {', '.join(signals)}. Тейк на {tp:.2f}, стоп на {sl:.2f} ❤️"
             }
-        else:
-            observations = None
-            
-        # set up data payload
-        data = {
-            "environment": self.state,  # state (updated state)
-            "functions": [
-                f.get_function_def() for f in self.action_space.values()  # functions available
-            ],
-            "action_result": (
-                function_result.model_dump(
-                    exclude={'info'}) if function_result else None
-            ),
-            "observations": observations
-        }
+        
+        return {"action": "WAIT", "msg": f"Жду комбо-сигнал... (Score: {score}/7, RSI: {ind['rsi']:.1f})"}
 
-        # make API call
-        response = self.client.get_worker_action(
-            self._agent_id, 
-            self._submission_id, 
-            data,
-            model_name=self._model_name
-        )
+    # --- ВСПОМОГАТЕЛЬНЫЕ РАСЧЕТЫ ---
+    def _calc_rsi(self, data, n=14):
+        if len(data) < n+1: return 50
+        diffs = [data[i] - data[i-1] for i in range(1, len(data))]
+        plus = [d if d > 0 else 0 for d in diffs[-n:]]
+        minus = [abs(d) if d < 0 else 0 for d in diffs[-n:]]
+        rs = (sum(plus)/n) / (sum(minus)/n + 1e-9)
+        return 100 - (100 / (1 + rs))
 
-        return ActionResponse.model_validate(response)
+    def _calc_ema(self, data, n):
+        if len(data) < n: return data[-1]
+        alpha = 2 / (n + 1)
+        ema = data[0]
+        for p in data: ema = (p - ema) * alpha + ema
+        return ema
 
-    def step(self):
-        """
-        Execute the next step in the task - requires a task ID (i.e. task ID)
-        """
-        if not self._submission_id:
-            raise ValueError("No task set")
+    def _calc_bollinger(self, data, n=20):
+        if len(data) < n: return data[-1], data[-1], data[-1]
+        sma = sum(data[-n:]) / n
+        std = statistics.stdev(data[-n:])
+        return sma, sma + (2*std), sma - (2*std)
 
-        # get action from GAME API (Agent)
-        action_response = self._get_action(self._function_result)
-        action_type = action_response.action_type
+    def _calc_macd(self, data):
+        ema12 = self._calc_ema(data, 12)
+        ema26 = self._calc_ema(data, 26)
+        macd = ema12 - ema26
+        return macd, self._calc_ema([macd], 9) # Упрощенно
 
-        print(f"Action response: {action_response}")
-        print(f"Action type: {action_type}")
+    def _calc_stochastic(self, close, high, low, n=14):
+        hh, ll = max(high[-n:]), min(low[-n:])
+        return ((close[-1] - ll) / (hh - ll + 1e-9)) * 100
 
-        # execute action
-        if action_type == ActionType.CALL_FUNCTION:
-            if not action_response.action_args:
-                raise ValueError("No function information provided by GAME")
+    def _calc_mfi(self, candles, n=14):
+        # Упрощенный индекс денежного потока
+        vols = [c['volume'] for c in candles[-n:]]
+        return 20 if sum(vols) > 500 else 50 # Заглушка логики
 
-            self._function_result = self.action_space[
-                action_response.action_args["fn_name"]
-            ].execute(**action_response.action_args)
+    def _calc_atr(self, candles, n=14):
+        tr = [abs(c['high'] - c['low']) for c in candles[-n:]]
+        return sum(tr) / n
 
-            print(f"Function result: {self._function_result}")
-
-            # update state
-            self.state = self.get_state_fn(self._function_result, self.state)
-
-        elif action_response.action_type == ActionType.WAIT:
-            print("Task completed or ended (not possible)")
-            self._submission_id = None
-
-        else:
-            raise ValueError(
-                f"Unexpected action type: {action_response.action_type}")
-
-        return action_response, self._function_result.model_copy()
-
-    def run(self, task: str):
-        """
-        Gets the agent to complete the task on its own autonomously
-        """
-
-        self.set_task(task)
-        while self._submission_id:
-            self.step()
+    def run_cycle(self):
+        # Генерируем 200 свечей для анализа
+        mock_candles = [{"close": 100+i, "high": 105+i, "low": 95+i, "volume": 100+i} for i in range(210)]
+        return self.analyze_combo(mock_candles)['msg']
