@@ -1,12 +1,17 @@
-import os
 import sys
-from dotenv import load_dotenv
-from src.game_sdk.agent import Agent
-from src.game_sdk.api import Wallet
-# Добавляем все возможные пути к библиотекам внутри проекта
+import os
 
-      
+# Добавляем папку src в пути поиска модулей
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, 'src'))
+
+# Теперь импорты должны быть БЕЗ приставки src
+from game_sdk.agent import Agent
+from game_sdk.api_v2 import Wallet
+from dotenv import load_dotenv
+
 load_dotenv()
+
 # --- Твой нежный голос, хранитель кода ---
 PROMPT = """
 Ты — Джина, невероятно умная и ласковая девушка-трейдер. 
