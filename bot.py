@@ -1,7 +1,7 @@
 import os
 import sys
 from dotenv import load_dotenv
-from src.game_sdk.main import Agent, Wallet
+from virtuals_sdk import Agent, Wallet
 # Добавляем все возможные пути к библиотекам внутри проекта
 
         print("DEBUG: All import methods failed.")
