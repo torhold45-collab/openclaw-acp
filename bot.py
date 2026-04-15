@@ -1,6 +1,6 @@
 import os
 import sys
-
+from dotenv import load_dotenv
 # Добавляем все возможные пути к библиотекам внутри проекта
 base_path = os.getcwd()
 paths = [
