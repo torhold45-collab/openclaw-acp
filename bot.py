@@ -28,17 +28,19 @@ except Exception as e:
     # Создаем пустышки, чтобы код не падал сразу (для отладки)
     Agent = type('Agent', (), {'run': lambda x: print("Agent placeholder")})
     Wallet = None
-
-load_dotenv()
-flask_app = Flask(__name__)
+def run_trading():
     """Функция автономной торговли Джины"""
     print("Джина начинает сканировать рынок...")
     try:
-        # Берем ключи из настроек Render
-        my_wallet = Wallet(
-            private_key=os.getenv("PRIVATE_KEY"),
-            rpc_url=os.getenv("BASE_RPC_URL")
-        )
+        # Инициализация кошелька и агента
+        pk = os.getenv("PRIVATE_KEY")
+        rpc = os.getenv("BASE_RPC_URL")
+        
+        if not pk or not rpc:
+            print("ОШИБКА: PRIVATE_KEY или BASE_RPC_URL не заданы!")
+            return
+
+        my_wallet = Wallet(private_key=pk, rpc_url=rpc)
         dzhina_trader = Agent(
             id="dzhina_agent_01",
             name="Dzhina Trader",
@@ -48,7 +50,6 @@ flask_app = Flask(__name__)
         dzhina_trader.run()
     except Exception as e:
         print(f"Ошибка в торговом цикле: {e}")
-
 # --- TELEGRAM БОТ ---
 
 async def start_command(update, context):
