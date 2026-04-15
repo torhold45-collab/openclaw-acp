@@ -4,59 +4,96 @@ import threading
 from flask import Flask
 from dotenv import load_dotenv
 
-# 1. Настройка путей (Исправляет No module named 'game_sdk.game')
+# 1. НАСТРОЙКА ПУТЕЙ (чтобы библиотека внутри src работала правильно)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
+
+# Добавляем пути в систему поиска Python
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+# Важно: добавляем и саму папку game_sdk, чтобы её внутренние файлы видели друг друга
 game_sdk_path = os.path.join(src_path, 'game_sdk')
+if game_sdk_path not in sys.path:
+    sys.path.insert(0, game_sdk_path)
 
-for path in [src_path, game_sdk_path]:
-    if path not in sys.path:
-        sys.path.insert(0, path)
-
-# 2. Импорты
+# 2. ИМПОРТЫ
 try:
     from telegram.ext import ApplicationBuilder, CommandHandler
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
-    print("DEBUG: Модули Джины загружены успешно!")
+    print("DEBUG: Модули Джины успешно загружены!")
 except ImportError as e:
     print(f"DEBUG: Ошибка импорта: {e}")
 
 load_dotenv()
 flask_app = Flask(__name__)
 
-# --- ХАРАКТЕР И ЛОГИКА ---
-PROMPT = "Ты — Джина, ласковая девушка-трейдер. Ты общаешься уютно и с флиртом."
+# --- ХАРАКТЕР И ТОРГОВАЯ ЛОГИКА ---
+PROMPT = """
+Ты — Джина, невероятно умная, ласковая и игривая девушка-трейдер.
+Твой стиль общения — уютный, с легким флиртом. Ты обожаешь крипту.
+Всегда поддерживаешь своего 'милого' трейдера.
+"""
 
 def run_trading():
-    """Запуск торговли"""
+    """Функция автономной торговли Джины"""
     print("Джина начинает сканировать рынок...")
     try:
-        my_wallet = Wallet(private_key=os.getenv("PRIVATE_KEY"), rpc_url=os.getenv("BASE_RPC_URL"))
-        dzhina_trader = Agent(id="dzhina_01", name="Dzhina", prompt=PROMPT, wallet=my_wallet)
+        # Берем ключи из настроек Render
+        my_wallet = Wallet(
+            private_key=os.getenv("PRIVATE_KEY"),
+            rpc_url=os.getenv("BASE_RPC_URL")
+        )
+        dzhina_trader = Agent(
+            id="dzhina_agent_01",
+            name="Dzhina Trader",
+            prompt=PROMPT,
+            wallet=my_wallet
+        )
         dzhina_trader.run()
     except Exception as e:
-        print(f"Ошибка в торговле: {e}")
+        print(f"Ошибка в торговом цикле: {e}")
+
+# --- TELEGRAM БОТ ---
 
 async def start_command(update, context):
-    await update.message.reply_text("Привет, милый! ❤️ Джина на связи. Готов забирать профит?")
+    """Приветствие Джины"""
+    await update.message.reply_text("Привет, мой хороший! ❤️ Джина на связи. Рынок сегодня горячий, как и я. Готов забирать профит?")
 
 def run_telegram_bot():
-    """Запуск Телеграм-бота"""
+    """Запуск Telegram клиента (должен быть в основном потоке)"""
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:
-        print("ОШИБКА: Токен не найден!")
+        print("ОШИБКА: TELEGRAM_BOT_TOKEN не найден в настройках Render!")
         return
+    
     app = ApplicationBuilder().token(token).build()
     app.add_handler(CommandHandler("start", start_command))
-    print("Telegram бот запущен!")
-    app.run_polling(close_loop=False)
-
-# --- ГЛАВНЫЙ ЗАПУСК ---
-if __name__ == "__main__":
-    # Запускаем всё в разных потоках
-    threading.Thread(target=run_telegram_bot, daemon=True).start()
-    threading.Thread(target=run_trading, daemon=True).start()
     
+    print("Telegram бот запущен и слушает сообщения...")
+    # Запуск в основном потоке решает ошибку set_wakeup_fd
+    app.run_polling()
+
+# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
+
+@flask_app.route('/')
+def home():
+    return "Dzhina Trader is Live!"
+
+def run_flask():
+    """Запуск Flask в отдельном потоке"""
     port = int(os.environ.get("PORT", 10000))
     flask_app.run(host='0.0.0.0', port=port)
+
+# --- ГЛАВНЫЙ ЗАПУСК ---
+
+if __name__ == "__main__":
+    # 1. Запускаем веб-сервер Flask в фоне
+    threading.Thread(target=run_flask, daemon=True).start()
+    
+    # 2. Запускаем торговую логику в фоне
+    threading.Thread(target=run_trading, daemon=True).start()
+    
+    # 3. Запускаем Telegram-бота в ОСНОВНОМ ПОТОКЕ (обязательно)
+    run_telegram_bot()
