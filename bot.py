@@ -11,6 +11,8 @@ if src_path not in sys.path:
 
 # Теперь импорты должны сработать
 try:
+    from telegram.ext import ApplicationBuilder, CommandHandler
+    import threading
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
 except ImportError as e:
@@ -96,7 +98,35 @@ def autonomous_trading_loop():
         except Exception as e:
             print(f"Ошибка в цикле охоты: {e}")
         time.sleep(60) # Проверяем рынок раз в минуту
+async def start_command(update, context):
+    await update.message.reply_text("Привет! Джина на связи и готова к работе.")
 
+# 2. Функция для запуска самого Telegram-клиента
+def run_telegram_bot():
+    token = os.getenv("TELEGRAM_TOKEN")
+    if not token:
+        print("ОШИБКА: TELEGRAM_TOKEN не задан в настройках Render!")
+        return
+    
+    # Собираем бота
+    app = ApplicationBuilder().token(token).build()
+    app.add_handler(CommandHandler("start", start_command))
+    
+    print("Telegram бот запущен...")
+    app.run_polling()
+
+# 3. Главный запуск (точка входа)
+if __name__ == "__main__":
+    # Запускаем Телеграм в отдельном потоке, чтобы он не мешал Flask
+    threading.Thread(target=run_telegram_bot, daemon=True).start()
+    
+    # Запускаем торговый цикл (если он у тебя прописан как автономный)
+    # threading.Thread(target=autonomous_trading_loop, daemon=True).start()
+    
+    # Запускаем Flask для Render (основной процесс)
+    port = int(os.environ.get("PORT", 7860))
+    print(f"Flask сервер запущен на порту {port}")
+    flask_app.run(host='0.0.0.0', port=port)
 # --- 7. ЗАПУСК ---
 if __name__ == "__main__":
     print("--- DZHINA UNIFIED SYSTEM: ACTIVATING ---")
