@@ -1,23 +1,69 @@
 import sys
 import os
+import threading
 from flask import Flask
 from dotenv import load_dotenv
 
-# Настройка путей (ВАЖНО: ставим src в начало поиска)
+# 1. Настройка путей (чтобы Python видел твою папку src/game_sdk)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(current_dir, 'src')
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-# Теперь импорты должны сработать
+# 2. Импорты библиотек
 try:
     from telegram.ext import ApplicationBuilder, CommandHandler
-    import threading
     from game_sdk.agent import Agent
     from game_sdk.api_v2 import Wallet
+    print("DEBUG: Библиотеки успешно загружены")
 except ImportError as e:
     print(f"DEBUG: Ошибка импорта: {e}")
 
+# 3. Инициализация Flask и переменных
+load_dotenv()
+flask_app = Flask(__name__)
+
+# --- Настройки твоего бота (ПРОМПТ) ---
+PROMPT = """
+Ты — Джина, невероятно умная и ласковая девушка-трейдер.
+Твой стиль — уютный, игривый, с легким флиртом.
+"""
+
+# --- Блок Telegram-бота ---
+
+async def start_command(update, context):
+    """Ответ на команду /start в Telegram"""
+    await update.message.reply_text("Привет, милый! Джина на связи и готова к профиту. Чем займемся сегодня? ❤️")
+
+def run_telegram_bot():
+    """Функция запуска Telegram клиента"""
+    token = os.getenv("TELEGRAM_TOKEN")
+    if not token:
+        print("ОШИБКА: TELEGRAM_TOKEN не найден в настройках Render!")
+        return
+    
+    try:
+        app = ApplicationBuilder().token(token).build()
+        app.add_handler(CommandHandler("start", start_command))
+        print("Telegram бот запущен и слушает сообщения...")
+        app.run_polling()
+    except Exception as e:
+        print(f"Критическая ошибка бота: {e}")
+
+# --- Главный запуск приложения ---
+
+if __name__ == "__main__":
+    # Запускаем Telegram-бота в фоновом потоке
+    bot_thread = threading.Thread(target=run_telegram_bot, daemon=True)
+    bot_thread.start()
+    
+    # Запускаем Flask для Render (основной процесс)
+    # Render сам назначит порт через переменную PORT
+    port = int(os.environ.get("PORT", 10000))
+    print(f"Flask сервер запущен на порту {port}")
+    
+    # Запуск сервера
+    flask_app.run(host='0.0.0.0', port=port)
 load_dotenv()
 flask_app = Flask(__name__)
 
