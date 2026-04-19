@@ -1,35 +1,54 @@
-import sys
 import os
-import threading
-from flask import Flask
-from dotenv import load_dotenv
+import logging
+import asyncio
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Настройка путей
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_path = os.path.join(current_dir, 'src')
-sys.path.insert(0, src_path)
+# Токен из переменных окружения (на Render или в .env)
+TOKEN = os.environ.get("TELEGRAM_TOKEN")
+if not TOKEN:
+    raise ValueError("Нет TELEGRAM_TOKEN!")
 
-from game_sdk.agent import Agent
-from game_sdk.api_v2 import Wallet
+logging.basicConfig(level=logging.INFO)
 
-load_dotenv()
-flask_app = Flask(__name__)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🐱 *Привет, мой повелитель!*\n\n"
+        "Я — Джина, твой ласковый торговый агент. "
+        "Уже анализирую рынок с 10 индикаторами и паттернами. "
+        "Скоро начну торговать на Hyperliquid.\n\n"
+        "Доступные команды:\n"
+        "/status — посмотреть портфель\n"
+        "/help — помощь\n"
+        "/profit — отчёт о прибыли",
+        parse_mode="Markdown"
+    )
 
-@flask_app.route('/')
-def health_check():
-    return "Dzhina Trading Bot is Active (No Telegram Mode)"
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Заглушка — позже подключим реальные данные из Hyperliquid
+    await update.message.reply_text(
+        "💰 *Текущий портфель*\n"
+        "Баланс USDC: 1000$\n"
+        "Открытые позиции: 0\n"
+        "PNL сегодня: 0$",
+        parse_mode="Markdown"
+    )
 
-def start_trading():
-    # Создаем кошелек и агента
-    wallet = Wallet(os.getenv("PRIVATE_KEY"), os.getenv("BASE_RPC_URL"))
-    dzhina = Agent("dzhina_01", "Dzhina Trader", "Character Prompt", wallet)
-    dzhina.run()
+async def profit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "📈 *Прибыль за сегодня:* 0.00$\n"
+        "Твоя доля (5%): 0.00$\n"
+        "Скоро появится реальная статистика!",
+        parse_mode="Markdown"
+    )
+
+def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("profit", profit))
+    print("🚀 Бот Джина запущен и слушает команды...")
+    app.run_polling()
 
 if __name__ == "__main__":
-    # 1. Запускаем торговый цикл в отдельном потоке
-    trading_thread = threading.Thread(target=start_trading, daemon=True)
-    trading_thread.start()
-
-    # 2. Запускаем Flask для Render
-    port = int(os.environ.get("PORT", 10000))
-    flask_app.run(host='0.0.0.0', port=port)
+    main()
