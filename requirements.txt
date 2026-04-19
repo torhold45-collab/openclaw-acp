@@ -1,7 +1,8 @@
-flask
-requests
-python-dotenv
-web3
-virtuals-sdk
-python-telegram-bot
-groq
+python-telegram-bot==21.*
+ccxt==4.4.*
+pandas==2.2.*
+numpy==1.26.*
+ta==0.11.*
+python-dotenv==1.0.*
+requests==2.32.*
+web3==6.20.*
